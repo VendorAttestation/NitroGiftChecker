@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using Discord;
+using Spectre.Console;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -186,6 +187,11 @@ internal static class Program
                     else
                     {
                         AnsiConsole.Markup($"[green]Valid Nitro Code: {code}[/]\n");
+                        if (appSettings.AutoRedeem)
+                        {
+                            DiscordClient discordClient = new DiscordClient(appSettings.Token);
+                            await discordClient.RedeemGiftAsync(code);
+                        }
                         lock (ValidLock)
                         {
                             File.AppendAllText($"ValidNitros-{date}.txt", $"{code}\n");

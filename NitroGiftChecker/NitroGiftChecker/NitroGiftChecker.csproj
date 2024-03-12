@@ -13,4 +13,10 @@
 	  <PackageReference Include="sharpconfig" Version="3.2.9.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Anarchy">
+      <HintPath>..\..\..\Anarchy\.bin\Anarchy\Debug\net6.0\Anarchy.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
