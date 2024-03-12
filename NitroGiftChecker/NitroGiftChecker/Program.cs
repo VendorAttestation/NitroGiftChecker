@@ -16,7 +16,8 @@ internal static class Program
     private static HashSet<string> UserAgents = new HashSet<string>();
     internal static string[] Proxies = File.ReadAllLines("proxies.txt");
     internal static int ProxyIndex = 0;
-    private static object consoleAndFileLock = new object();
+    private static object ValidLock = new object();
+    private static object DebugLock = new object();
     private static string date = DateTime.Now.ToString("MM-dd-yyyy");
     static WebProxy GetProxy()
     {
@@ -111,7 +112,6 @@ internal static class Program
 
                 HttpResponseMessage response2 = await httpClient.GetAsync("https://cdn.jsdelivr.net/gh/microlinkhq/top-user-agents@master/src/mobile.json");
                 response2.EnsureSuccessStatusCode();
-                ;
                 List<string> jsonObject2 = JsonSerializer.Deserialize<List<string>>(await response2.Content.ReadAsStringAsync());
                 foreach (var item in jsonObject2)
                 {
@@ -120,9 +120,13 @@ internal static class Program
             } 
             catch (HttpRequestException e)
             {
-                Console.WriteLine("\nException Caught!");
-                Console.WriteLine("Message :{0} ", e.Message);
-                Console.ReadKey();
+                if (appSettings.Debug)
+                {
+                    lock (DebugLock)
+                    {
+                        File.AppendAllText($"DebugLogs-{date}.txt", e.Message);
+                    }
+                }
             }
         }
 
@@ -182,17 +186,22 @@ internal static class Program
                     else
                     {
                         AnsiConsole.Markup($"[green]Valid Nitro Code: {code}[/]\n");
-                        lock (consoleAndFileLock)
+                        lock (ValidLock)
                         {
                             File.AppendAllText($"ValidNitros-{date}.txt", $"{code}\n");
                         }
                     }
                 }
-                catch (HttpRequestException)
+                catch (HttpRequestException e)
                 {
-
+                    if (appSettings.Debug)
+                    {
+                        lock (DebugLock)
+                        {
+                            File.AppendAllText($"DebugLogs-{date}.txt", e.Message);
+                        }
+                    }
                 }
-                await Task.Delay(1);
             }
         }
     }
