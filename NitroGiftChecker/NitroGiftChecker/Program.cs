@@ -10,6 +10,7 @@ internal static class Program
     {
         public string message { get; set; }
         public int code { get; set; }
+        public double retry_after { get; set; }
     }
 
     public static Settings? appSettings;
@@ -161,7 +162,7 @@ internal static class Program
         while (true)
         {
 
-            Console.Title = $"Nitro Checker V1 / User_Agents Loaded: {UserAgents.Count}";
+            Console.Title = $"Nitro Checker V1.3 / User_Agents Loaded: {UserAgents.Count}";
 
             var code = GenerateRandomString(16);
             string url = $"https://discord.com/api/v{random.Next(6, 11)}/entitlements/gift-codes/{code}";
@@ -169,6 +170,7 @@ internal static class Program
             {
                 try
                 {
+                    Retry:
                     httpClient.DefaultRequestHeaders.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", GetRandomUserAgent());
                     HttpResponseMessage response = await httpClient.GetAsync(url);
@@ -182,7 +184,12 @@ internal static class Program
                     }
                     else if (response.StatusCode == HttpStatusCode.TooManyRequests)
                     {
-                        AnsiConsole.Markup($"[yellow]Ratelimited Use Better Proxies Or Simply Use Rotating Proxies[/]\n");
+                        if (appSettings.Debug)
+                        {
+                            AnsiConsole.Markup($"[yellow]Ratelimited Use Better Proxies Or Simply Use Rotating Proxies[/]\n");
+                        }
+                        await Task.Delay(TimeSpan.FromSeconds(jsonObject.retry_after));
+                        goto Retry;
                     }
                     else
                     {
