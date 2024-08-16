@@ -2,4 +2,4 @@
 Nitro Gift Gen / Checker
 
 # Needed to build
-https://github.com/TheVisual/Anarchy
+https://github.com/VendorAttestation/Anarchy
